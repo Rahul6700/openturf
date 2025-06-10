@@ -1,0 +1,97 @@
+import { useState } from 'react'
+import './index.css'
+
+
+function Widget() {
+
+  const [messages, setmessages] = useState([]);
+  const [input, setinput] = useState("");
+
+  const handleSend = () => {
+
+    // Validate whether input is empty
+    if (input.trim() === "") {
+      return;
+    }
+
+    const newMessage = {
+      sender: "user",
+      text: input
+    };
+
+    setmessages([...messages, newMessage]);
+
+    setinput("");
+  };
+
+const handleVoice = () => {
+  console.log('handleVoice called');
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  // Check if browser supports voice input
+  if (!SpeechRecognition) {
+    alert('Voice input not supported in your browser, please use text instead');
+    console.warn('SpeechRecognition not supported');
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+
+  console.log('SpeechRecognition instance created');
+
+  recognition.onstart = () => {
+    console.log('Speech recognition started');
+  };
+
+  recognition.onresult = (event) => {
+    console.log('Speech recognition result event:', event);
+
+    // Transcript var contains the voice input in text
+    const transcript = event.results[0][0].transcript;
+    console.log('Transcript:', transcript);
+
+    const newMessage = {
+      sender: 'User',
+      text: transcript
+    };
+
+    // Assuming setmessages and messages are defined in your React component
+    setmessages([...messages, newMessage]);
+
+    console.log('New message added:', newMessage);
+  };
+
+  recognition.onerror = (event) => {
+    console.error('Speech recognition error:', event.error);
+  };
+
+  recognition.onend = () => {
+    console.log('Speech recognition ended');
+  };
+
+  recognition.start();
+  console.log('Speech recognition started (recognition.start called)');
+};
+
+
+  return (
+    <div className="widget-container">
+      <div className="messages">
+        {messages.map((msg, i) => (
+          <div key={i} className="message">
+            <strong>{msg.sender}:</strong> {msg.text}
+          </div>
+        ))}
+      </div>
+      <input type="text" value={input} placeholder="enter message here..." onChange={(e) => setinput(e.target.value)} />
+      <button onClick={handleSend}>Send</button>
+      <button onClick={handleVoice}>Voice</button>
+    </div>
+  );
+}
+
+export default Widget;
