@@ -3,6 +3,9 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
+const {register} = require('./core/users');
+
+app.use(express.json());
 
 //connecting mongodb
 mongoose.connect(process.env.MONGODB_URI)
@@ -15,6 +18,9 @@ mongoose.connect(process.env.MONGODB_URI)
 app.get('/', (req, res) => {
   res.send('hello world');
 })
+
+app.use('/register', register);
+
 
 let PORT = 5000;
 app.listen(PORT, ()=>{
