@@ -2,10 +2,12 @@ require('dotenv').config();
 
 const express = require('express');
 const app = express();
+const cors = require('cors')
 const mongoose = require('mongoose');
 const {register, signin} = require('./core/users');
 
 app.use(express.json());
+app.use(cors()); //using cors cuz both BE and FE are running on localhost
 
 //connecting mongodb
 mongoose.connect(process.env.MONGODB_URI)

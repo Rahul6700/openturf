@@ -56,20 +56,17 @@ async function signin (req, res) {
     if (!email || !password) {
       return res.status(400).json({ error: `enter an email and password`});
     }
-
-    const user = await User.fineOne({ email })
+    const user = await User.findOne({ email })
 
     if (!user) {
       return res.status(401).json({ error : `invalid username or password`})
     }
-
     //compare the hashed password
-    const isMatch = await bycrpt.compare(password, user.password)
+    const isMatch = await bcrypt.compare(password, user.password);
 
-    if (!isMatched) {
-      return res.status(400).json({ error: `enter an email and password`});
+    if (!isMatch) {
+      return res.status(400).json({ error: `Incorrect Email or password`});
     }
-
     res.status(200).json({ success : `logged in successfully`});
   
   } catch (error) {
