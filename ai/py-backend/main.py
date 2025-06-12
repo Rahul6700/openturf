@@ -2,18 +2,35 @@ import os
 import pinecone
 from pymongo import MongoClient
 from dotenv import load_dotenv
+from pinecone import Pinecone, ServerlessSpec
 from google import genai
 from sklearn.feature_extraction.text import TfidfVectorizer
 from fastapi import FastAPI, Request, HTTPException
+from pydantic import BaseModel
 
 app = FastAPI()
+
+load_dotenv('../../.env')
+
+pc = Pinecone(
+    api_key=os.getenv("PINECONE_API_KEY"),
+    environment="us-east1-gcp" 
+) 
+gemini_key = os.getenv("GEMINI_API_KEY")
+mongo_client = MongoClient(os.getenv("MONGODB_URI"))
+db = mongo_client.get_database("widget")  
+users_collection = db.get_collection("users")   
+
+class QueryRequest(BaseModel):
+    query : str
 
 @app.get("/")
 def root():
     return {"hello" : "world"}
 
 @app.post("/text")
-async def process_text(request: Request, query: str):
+async def process_text(request: Request, query_request: QueryRequest):
+
     """
     This endpoint receives a text query and returns the closest match from the user's Pinecone index.
     """
@@ -39,8 +56,9 @@ async def process_text(request: Request, query: str):
             vectors = vectorizer.fit_transform([query])
             vector = vectors.toarray()[0]
             return vector
-
-        query_vector = vectorize_query(query)  
+        
+        query = query_request.query
+        query_vector = vectorize_query(query).tolist()  
 
         # Search for the closest vectors in Pinecone
         results = index.query(
@@ -72,5 +90,9 @@ async def process_text(request: Request, query: str):
     response = gemini_client.models.generate_content(
         model="gemini-2.0-flash", contents=prompt
     )
+    try:
+        response_text = response.candidates[0].content.parts[0].text.strip()
+    except Exception:
+        response_text = "nil"
     
-    return {"response": response}
+    return {"response": response_text}
