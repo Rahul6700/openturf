@@ -50,7 +50,7 @@ async function register (req,res) {
   }
 }
 
-async function signin (req, res) => {
+async function signin (req, res) {
   try {
     const {email, password} = req.body;
     if (!email || !password) {
