@@ -7,7 +7,7 @@ function Widget() {
   const [messages, setmessages] = useState([]);
   const [input, setinput] = useState("");
 
-  const handleSend = () => {
+  const handleText = async () => {
 
     // Validate whether input is empty
     if (input.trim() === "") {
@@ -22,6 +22,34 @@ function Widget() {
     setmessages([...messages, newMessage]);
 
     setinput("");
+
+    //get the API key from localstorage or something
+    
+    console.log('sending req to backend')
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/text", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": apikey
+        },
+        body: JSON.stringify({
+        query: input 
+      })
+    });
+    console.log('recieved response from backend')
+    const data = await response.json();
+
+    const newResponse = {
+      sender: "ai",
+      text: data.response  
+    };
+    setmessages(prevMessages => [...prevMessages, newResponse]);
+
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   };
 
 const handleVoice = () => {
@@ -88,7 +116,7 @@ const handleVoice = () => {
         ))}
       </div>
       <input type="text" value={input} placeholder="enter message here..." onChange={(e) => setinput(e.target.value)} />
-      <button onClick={handleSend}>Send</button>
+      <button onClick={handleText}>Send</button>
       <button onClick={handleVoice}>Voice</button>
     </div>
   );

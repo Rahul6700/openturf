@@ -8,8 +8,18 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
 from datetime import datetime
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+#cors middleware cuz backend and frontend are running on localhost for now
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 load_dotenv('../../.env')
 
