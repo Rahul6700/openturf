@@ -50,4 +50,31 @@ async function register (req,res) {
   }
 }
 
-module.exports = { register };
+async function signin (req, res) => {
+  try {
+    const {email, password} = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: `enter an email and password`});
+    }
+
+    const user = await User.fineOne({ email })
+
+    if (!user) {
+      return res.status(401).json({ error : `invalid username or password`})
+    }
+
+    //compare the hashed password
+    const isMatch = await bycrpt.compare(password, user.password)
+
+    if (!isMatched) {
+      return res.status(400).json({ error: `enter an email and password`});
+    }
+
+    res.status(200).json({ success : `logged in successfully`});
+  
+  } catch (error) {
+    res.status(500).json({ error : `internal server error, please try again`});
+  }
+}
+
+module.exports = { register, signin };
