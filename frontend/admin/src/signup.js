@@ -13,34 +13,31 @@ export default function Signup  () {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    try {
+      const response = await fetch ('http://localhost:5000/register', {
+        method : 'POST',
+        headers : {
+          'Content-Type' : 'application/json',
+        },
+          body: JSON.stringify({ username, email, password }),
+      });
+
+      const data = await response.json(); 
+
+      if(response.ok){
+        alert(`your API key (keep it safe) : ${data.success}`)
+        navigate('/home')
+      } else {
+        alert(data.error)
+      }
+    } catch (error) {
+      console.log(error)
+      alert(`an error has occured, please try again`)
+    }
   }
 
-  let userData = {
-    username,
-    email,
-    password
-  }
-  //
-  // try {
-  //   const response = await fetch("http://localhost:5000/register", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json"
-  //     },
-  //       body: JSON.stringify(userData)
-  //     });
-  //
-  //   const data = await response.json();
-  //
-  //   if (response.ok) {
-  //     alert(`Success! Your API key is: ${data.success}`);
-  //   } else {
-  //     alert(`Error: ${data.error}`);
-  //   }
-  //   } catch (error) {
-  //       console.error("Registration failed:", error);
-  //       alert("An error occurred. Please try again.");
-  // }
+
 
   return (
     <div className='d-flex align-items-center justify-content-center vh-100 bg-light'>

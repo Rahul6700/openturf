@@ -10,8 +10,29 @@ export default function Signin() {
     navigate('/signup');
   };
 
-  const handleSubmit = (e) => {
-    
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch ('http://localhost:5000/signin', {
+        method : 'POST',
+        headers : {
+          'Content-Type' : 'application/json',
+        },
+          body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json(); 
+
+      if(response.ok){
+        navigate('/home')
+      } else {
+        alert(data.error)
+      }
+    } catch (error) {
+      console.log(error)
+      alert(`an error has occured, please try again`)
+    }
   };
   return (
     <div className='d-flex align-items-center justify-content-center vh-100 bg-light'>
