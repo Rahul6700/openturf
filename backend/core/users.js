@@ -19,8 +19,10 @@ async function register (req,res) {
     const apikey = crypto.randomBytes(32).toString('hex');
     //hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
+    //setting default llm failure message
+    const message = "I'm unable to assist with that request. Please contact support for further help.";
     //write the user to DB
-    const newUser = new User({username, email, password: hashedPassword, apikey});
+    const newUser = new User({username, email, password: hashedPassword, apikey, message});
     await newUser.save();
 
     //creating a new pinecone index for the user with the index name as the username
@@ -36,7 +38,7 @@ async function register (req,res) {
         waitUntilReady: true,
       });
         } catch (pineconeError) {
-          console.error("Pinecone Error:", pineconeError);  // Log Pinecone error for debugging
+          console.error("Pinecone Error:", pineconeError); 
           return res.status(500).json({ error: `Failed to create Pinecone index` });
         }
 

@@ -21,6 +21,11 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  message: {
+    type: String,
+    required: true,
+    unique: false
+  },
   createdat: {
     type: Date,
     default: Date.now
