@@ -1,7 +1,35 @@
 import React from "react";
+import { useState } from 'react'
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Home() {
+
+  const [message, setmessage] = useState("your custom message here");
+
+  const handleSave = async () => {
+     try {
+      const response = await fetch ('http://localhost:5000/modify', {
+        method : 'POST',
+        headers : {
+          'Content-Type' : 'application/json',
+        },
+          body: JSON.stringify({ message }),
+      });
+
+      const data = await response.json(); 
+
+      if(response.ok){
+        alert(data.success)
+      } else {
+        alert(data.error)
+      }
+    } catch (error) {
+      console.log(error)
+      alert(`an error has occured, please try again`)
+    }
+    setmessage(message);
+  }
+
   return (
     <div className="container py-5">
       <h2 className="mb-4">Admin Dashboard</h2>
@@ -24,8 +52,10 @@ function Home() {
             type="text"
             className="form-control mb-3"
             placeholder="Enter custom rejection message"
+            onChange={(e) => setmessage(e.target.value)}
+            value = {message}
           />
-          <button className="btn btn-success">Save</button>
+          <button className="btn btn-success" onClick = {handleSave} >Save</button>
         </div>
       </div>
 
