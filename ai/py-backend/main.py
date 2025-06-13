@@ -105,8 +105,10 @@ async def process_text(request: Request, query_request: QueryRequest):
     )
     try:
         response_text = response.candidates[0].content.parts[0].text.strip()
+        if response_text == 'nil':
+            response_text = user["message"]
     except Exception:
-        response_text = "nil"
+        response_text = user["message"]
 
     logs_collection.insert_one({
         "type" : "response",
