@@ -32,4 +32,35 @@ const userSchema = new mongoose.Schema({
   }
 })
 
-module.exports = mongoose.model('User', userSchema);
+const logSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    required: true,
+    unique: false
+  },
+  username: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  apikey: {
+    type: String,
+    required: true,
+    unique: false
+  },
+  query: {
+    type: String,
+    required: true,
+    unique: false,
+  },
+  timestamp: {
+    type: String,
+    required: true,
+    unique: false
+  }
+})
+
+const User = mongoose.model('User', userSchema);
+const Log = mongoose.model('Log', logSchema)
+
+module.exports = { User, Log }

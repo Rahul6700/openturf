@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const { Pinecone } = require('@pinecone-database/pinecone');
 const router = express.Router();
-const User = require('../models/models.js');
+const { User, Log } = require('../models/models.js');
 
 const pc = new Pinecone({
   apiKey: process.env.PINECONE_API_KEY
@@ -48,6 +48,7 @@ async function register (req,res) {
     if(error.code === 11000) {
       return res.status(400).json({ error: `username or email already exists`});
     }
+    console.log(error)
     res.status(500).json({error: `internal server error, please try again`});
   }
 }
@@ -76,7 +77,7 @@ async function signin (req, res) {
   }
 }
 
-async function modifyMessage (req, res) {
+async function modifyMessage (req, res) { 
   try {
     const {message} = req.body;
 
@@ -102,4 +103,27 @@ async function modifyMessage (req, res) {
   }
 }
 
-module.exports = { register, signin, modifyMessage };
+async function viewLogs (req, res) {
+  try {
+    const apikey = req.headers['authorization'];
+
+    if (!apikey) {
+      return res.status(401).json({ error : `missing apikey`});
+    }
+
+    const user = await User.findOne({ apikey });
+
+    if (!user) {
+      return res.status(401).json({ error : `user not found`});
+    }
+
+    const logs = await Log.find({ apikey : apikey });
+
+    res.status(201).json({ success : logs })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ error : `internal server error`});
+  }
+}
+
+module.exports = { register, signin, modifyMessage, viewLogs };

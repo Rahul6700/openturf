@@ -71,7 +71,7 @@ async def process_text(request: Request, query_request: QueryRequest):
             "type" : "query",
             "username" : username,
             "apikey" : api_key,
-            "query" : query,
+            "text" : query,
             "timestamp" : datetime.utcnow().isoformat()
         })
 
@@ -114,7 +114,7 @@ async def process_text(request: Request, query_request: QueryRequest):
         "type" : "response",
         "username" : username,
         "apikey" : api_key,
-        "response" : response_text,
+        "text" : response_text,
         "timestamp" : datetime.utcnow().isoformat()
     })
     

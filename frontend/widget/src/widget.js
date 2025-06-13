@@ -26,7 +26,7 @@ function Widget() {
     //get the API key from localstorage or something
     
     console.log('sending req to backend')
-
+    
     try {
       const response = await fetch("http://127.0.0.1:8000/text", {
         method: "POST",

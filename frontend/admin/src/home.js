@@ -5,6 +5,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 function Home() {
 
   const [message, setmessage] = useState("your custom message here");
+  const [logs, setLogs] = useState([]);      
+
 
   const handleSave = async () => {
      try {
@@ -12,6 +14,7 @@ function Home() {
         method : 'POST',
         headers : {
           'Content-Type' : 'application/json',
+          'Authorization': apikey
         },
           body: JSON.stringify({ message }),
       });
@@ -29,6 +32,24 @@ function Home() {
     }
     setmessage(message);
   }
+
+  const fetchLogs = async () => {
+  
+    try {
+      const res = await fetch('http://localhost:5000/logs', {
+        method: 'GET',
+        headers: {
+          'Authorization': apikey
+        }
+      });
+
+      const data = await res.json();
+      setLogs(data.success || []);
+    
+    } catch (error) {
+      console.error('Error fetching logs:', error);
+    }
+  };
 
   return (
     <div className="container py-5">
@@ -59,19 +80,45 @@ function Home() {
         </div>
       </div>
 
-      <div className="card mb-4">
-        <div className="card-header">View Logs</div>
-        <div className="card-body">
-          <button className="btn btn-primary mb-3">Load Logs</button>
-          <ul className="list-group">
-            <li className="list-group-item">
-              <strong>User:</strong>hello ai<br />
-              <strong>Query:</strong> What is my API key? <br />
-              <strong>Response:</strong>?????<br />
+
+    <div className="card mb-4">
+  <div className="card-header">View Logs</div>
+  <div className="card-body">
+    <button className="btn btn-primary mb-3" onClick={fetchLogs}>
+      Load Logs
+    </button>
+      <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+        <ul className="list-group">
+          {logs.map((log, index) => (
+            <li key={index} className="list-group-item">
+              <div><strong>Type:</strong> {log.type}</div>
+              <div><strong>Text:</strong> {log.text}</div>
+              <div><strong>Timestamp:</strong> {new Date(log.timestamp).toLocaleString()}</div>
             </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+    
+        <div className="card mb-4">
+      <div className="card-header">View Logs</div>
+      <div className="card-body">
+        <button className="btn btn-primary mb-3" onClick={fetchLogs}>
+          Load Logs
+        </button>
+
+        <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+          <ul className="list-group">
+            {logs.map((log, index) => (
+              <li key={index} className="list-group-item">
+                <strong>{log.type}:</strong> {log.query}
+              </li>
+            ))}
           </ul>
         </div>
       </div>
+    </div>
 
     </div>
   );
