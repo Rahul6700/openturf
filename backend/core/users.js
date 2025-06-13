@@ -76,4 +76,30 @@ async function signin (req, res) {
   }
 }
 
-module.exports = { register, signin };
+async function modifyMessage (req, res) {
+  try {
+    const {message} = req.body;
+
+    const apikey = req.headers['authorization'];
+
+    if (!apikey) {
+      return res.status(401).json({ error: `missing apikey`});
+    }
+
+    const user = await User.findOne({ apikey });
+
+    if (!user) {
+      return res.status(401).json({ error : `user not found` });
+    }
+
+    user.message = message;
+    await user.save();
+
+    res.status(200).json({ success : `message modified successfully`})
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ error: `error : internal server error`})
+  }
+}
+
+module.exports = { register, signin, modifyMessage };
