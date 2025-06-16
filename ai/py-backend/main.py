@@ -5,10 +5,20 @@ from dotenv import load_dotenv
 from pinecone import Pinecone, ServerlessSpec
 from google import genai
 from sklearn.feature_extraction.text import TfidfVectorizer
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, UploadFile, File
 from pydantic import BaseModel
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
+import fitz  
+from sentence_transformers import SentenceTransformer
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,  # You can use DEBUG for more verbosity
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
 
 app = FastAPI()
 
@@ -119,3 +129,67 @@ async def process_text(request: Request, query_request: QueryRequest):
     })
     
     return {"response": response_text}
+
+
+@app.post("/upload-pdf")
+async def upload_pdf(request: Request, file: UploadFile = File(...)):
+
+    api_key = request.headers.get("Authorization")
+    if not api_key:
+        raise HTTPException(status_code=400, detail="API key is missing in the request header")
+
+    #using the apikey to map the corresponding username
+    user = users_collection.find_one({"apikey": api_key})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    username = user["username"]  #username found and stored here
+    pinecone_index_name = username
+
+    temp_path = f"/tmp/{file.filename}"
+    with open(temp_path, "wb") as f:
+        f.write(await file.read())
+
+    doc = fitz.open(temp_path)
+    text = "\n".join(page.get_text() for page in doc)
+    doc.close()
+    os.remove(temp_path)
+
+    if not text.strip():
+        raise HTTPException(status_code=400, detail="The PDF appears to be empty or unreadable.")
+
+    try:
+    # Split the text into chunks -> chunk size = 500 with overlap of 50
+        chunk_size = 500
+        overlap = 50
+        chunks = []
+        start = 0
+        while start < len(text):
+            end = min(start + chunk_size, len(text))
+            chunk = text[start:end].strip()
+            if chunk:
+                chunks.append(chunk)
+            start += chunk_size - overlap
+        logger.info("split into chunks")
+
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+        logger.info('finished loading model')
+
+        vectors = []
+        for i, chunk in enumerate(chunks):
+            embedding = model.encode(chunk).tolist()
+            vectors.append({
+                "id": f"{file.filename}-chunk-{i}",
+                "values": embedding,
+            })
+        logger.info('put chuks in the array')
+
+        index = pc.Index(pinecone_index_name)
+        index.upsert(vectors=vectors)# make sure `index` is defined from pinecone.Index(...)
+        logger.info('added to db')
+        return "Successfully uploaded and stored embeddings."
+
+    except Exception as e:
+        logger.error(f"Exception in upload_pdf: {e}", exc_info=True)
+        return "Internal server error. Try again later."
+

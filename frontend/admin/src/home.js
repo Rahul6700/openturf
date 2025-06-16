@@ -7,7 +7,6 @@ function Home() {
   const [message, setmessage] = useState("your custom message here");
   const [logs, setLogs] = useState([]);      
 
-
   const handleSave = async () => {
      try {
       const response = await fetch ('http://localhost:5000/modify', {

@@ -27,16 +27,18 @@ async function register (req,res) {
 
     //creating a new pinecone index for the user with the index name as the username
     try {
-      await pc.createIndexForModel({
-        name: username,
+    await pc.createIndex({
+      name: username,
+      dimension: 384,
+      metric: 'cosine',
+      spec: {
+        serverless: {
         cloud: 'aws',
         region: 'us-east-1',
-        embed: {
-          model: 'llama-text-embed-v2',
-          fieldMap: { text: 'chunk_text' },
-        },
-        waitUntilReady: true,
-      });
+      },
+    },
+      waitUntilReady: true,
+    });
         } catch (pineconeError) {
           console.error("Pinecone Error:", pineconeError); 
           return res.status(500).json({ error: `Failed to create Pinecone index` });
