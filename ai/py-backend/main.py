@@ -12,9 +12,10 @@ from fastapi.middleware.cors import CORSMiddleware
 import fitz  
 from sentence_transformers import SentenceTransformer
 import logging
+import re
 
 logging.basicConfig(
-    level=logging.INFO,  
+    level=logging.INFO,  # You can use DEBUG for more verbosity
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
@@ -188,10 +189,14 @@ async def upload_pdf(request: Request, file: UploadFile = File(...)):
         logger.info('finished loading model')
 
         vectors = []
+
+        #sanitizing the file so that the model does not crash
+        safe_filename = re.sub(r'[^a-zA-Z0-9_.-]', '_', file.filename)
+
         for i, chunk in enumerate(chunks):
             embedding = model.encode(chunk).tolist()
             vectors.append({
-                "id": f"{file.filename}-chunk-{i}",
+                "id": f"{safe_filename}-chunk-{i}",
                 "values": embedding,
                     "metadata": {
                         "text": chunk 
@@ -206,5 +211,6 @@ async def upload_pdf(request: Request, file: UploadFile = File(...)):
 
     except Exception as e:
         logger.error(f"Exception in upload_pdf: {e}", exc_info=True)
-        return "Internal server error. Try again later."
+        logger.info(str(e))
+        raise HTTPException(status_code=500, detail="Internal server error. Try again later.")
 

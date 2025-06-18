@@ -4,8 +4,49 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 function Home() {
 
+  const apikey = 'bc7acac9691352a3da8d18872da375785ecb06ad7c35216592955950988a96fc'
+
   const [message, setmessage] = useState("your custom message here");
-  const [logs, setLogs] = useState([]);      
+  const [logs, setLogs] = useState([]);
+  const [file, setFile] = useState(null);
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
+  const handleUpload = async () => {
+ 
+    if (!file) {
+      alert('upload a file first')
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+
+      const response = await fetch('http://localhost:8000/upload-pdf', {
+        method : 'POST',
+        headers : {
+          Authorization : apikey
+        },
+        body : formData,
+      })
+
+      if(!response.ok){
+        alert('upload failed, try again')
+      }
+
+      const result = await response.text();
+      alert(result);
+
+    } catch (error) {
+      console.log(error)
+      alert('internal server error, try uploading later')
+    }
+  }
+
 
   const handleSave = async () => {
      try {
@@ -60,8 +101,10 @@ function Home() {
           <input
             type="file"
             className="form-control mb-3"
+            accept="application/pdf"
+            onChange={handleFileChange}
           />
-          <button className="btn btn-info">Upload</button>
+          <button className="btn btn-info" onClick={handleUpload}>Upload</button>
         </div>
       </div>
 
@@ -100,24 +143,6 @@ function Home() {
     </div>
   </div>
     
-        <div className="card mb-4">
-      <div className="card-header">View Logs</div>
-      <div className="card-body">
-        <button className="btn btn-primary mb-3" onClick={fetchLogs}>
-          Load Logs
-        </button>
-
-        <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-          <ul className="list-group">
-            {logs.map((log, index) => (
-              <li key={index} className="list-group-item">
-                <strong>{log.type}:</strong> {log.query}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
 
     </div>
   );

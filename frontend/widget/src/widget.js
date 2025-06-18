@@ -4,6 +4,8 @@ import './index.css'
 
 function Widget() {
 
+  const apikey = 'wewe'
+
   const [messages, setmessages] = useState([]);
   const [input, setinput] = useState("");
 
