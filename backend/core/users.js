@@ -4,17 +4,27 @@ const bcrypt = require('bcryptjs');
 const { Pinecone } = require('@pinecone-database/pinecone');
 const router = express.Router();
 const { User, Log } = require('../models/models.js');
+const validator = require('validator'); 
 
 const pc = new Pinecone({
   apiKey: process.env.PINECONE_API_KEY
 });
 
+const validEmail = (email) =>{
+  return validator.isEmail(email);
+}
+
 async function register (req,res) {
   try {
     const {username, email, password} = req.body;
     if (!username || !email || !password){
-      return res.status(400).json({ error: `enter valid credentials`});
+      return res.status(400).json({ error: `all 3 fields are mandatory`});
     }
+
+    if(!validEmail(email)){
+      return res.status(400).json({ error : `invalid email format`});
+    }
+
     //create a new API key for the user
     const apikey = crypto.randomBytes(32).toString('hex');
     //hash the password
