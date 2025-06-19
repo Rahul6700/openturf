@@ -53,13 +53,14 @@ export default function Signin() {
           ></textarea>
 
           <h3 className='mb-2'>Password</h3>
-          <textarea
+          <input
+            type = 'password'
             className='form-control mb-3'
             style={{ width: '267px', height: '40px' }}
             placeholder='Enter password'
             value={password}
             onChange={(e) => setpassword(e.target.value)}
-          ></textarea>
+          />
 
           <button className='btn btn-primary' onClick={handleSubmit}>
             Submit
