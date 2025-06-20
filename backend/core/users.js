@@ -85,6 +85,7 @@ async function signin (req, res) {
     res.status(200).json({ success : `logged in successfully`});
   
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error : `internal server error, please try again`});
   }
 }
