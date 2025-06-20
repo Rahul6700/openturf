@@ -68,6 +68,7 @@ export default function Signup  () {
 
           <h4 className='mb-2'>Password</h4>
           <input
+            type = 'password'
             className='form-control mb-3'
             style={{ width: '267px', height: '40px' }}
             placeholder='Enter password'
