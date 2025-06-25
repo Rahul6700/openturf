@@ -13,6 +13,8 @@ import fitz
 from sentence_transformers import SentenceTransformer
 import logging
 import re
+import redis
+from openai import OpenAI as OpenRouterClient
 
 logging.basicConfig(
     level=logging.INFO,  # You can use DEBUG for more verbosity
@@ -34,6 +36,7 @@ app.add_middleware(
 
 load_dotenv('../../.env')
 
+
 pc = Pinecone(
     api_key=os.getenv("PINECONE_API_KEY"),
     environment="us-east1-gcp" 
@@ -46,6 +49,7 @@ logs_collection = db.get_collection("logs")
 
 class QueryRequest(BaseModel):
     query : str
+    model : str
 
 @app.get("/")
 def root():
@@ -64,6 +68,7 @@ async def process_text(request: Request, query_request: QueryRequest):
 
     username = user["username"]
     pinecone_index_name = username  
+    selected_model = query_request.model
 
     try:
         logger.info("Initializing Pinecone index.")
@@ -113,34 +118,57 @@ async def process_text(request: Request, query_request: QueryRequest):
             reply with the word 'nil'. Make sure your response is concise and relevant to the provided data, but
             also maintain a friendly tone and behave like a friendly and helpful assistant. Dont just
             spit out points bluntly, explain little .If you can't find an answer within the data,
-            do not try to generate an answer beyond it. Data Provided: {data}, User Query: {query}"""
-
-    gemini_client = genai.Client(api_key=gemini_key)
-
-    logger.info(f"Prompt being sent to Gemini:\n{prompt}")
-
-    logger.info("Sending prompt to Gemini model.")
-    response = gemini_client.models.generate_content(
-        model="gemini-2.0-flash", contents=prompt
-    )
+            do not try to generate an answer beyond it. Do NOT use special formatting or hidden tokens like ◁think▷. 
+            Data Provided: {data}, User Query: {query}"""
+    
     try:
-        response_text = response.candidates[0].content.parts[0].text.strip()
-        logger.info(f"Gemini response: {response_text}")
+        if selected_model == "kimi-dev":
+            model_id = "moonshotai/kimi-dev-72b:free"
+        elif selected_model == "mistral":
+            model_id = "mistralai/mistral-small-3.2-24b-instruct:free"
+        elif selected_model == "deepseek":
+            model_id = "deepseek/deepseek-r1-0528-qwen3-8b:free"
+        else:
+            model_id = None
+
+        if model_id:
+            logger.info('using',model_id)
+            openrouter_client = OpenRouterClient(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=os.getenv("OPENAI_API_KEY")
+            )
+            response = openrouter_client.chat.completions.create(
+                model=model_id,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            response_text = response.choices[0].message.content.strip()
+
+        else:
+            logger.info("Using Gemini model.")
+            gemini_client = genai.Client(api_key=gemini_key)
+            response = gemini_client.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=prompt
+            )
+            response_text = response.candidates[0].content.parts[0].text.strip()
+
         if response_text == 'nil':
-            logger.info("Gemini returned 'nil', replacing with fallback user message.")
+            logger.info("Model returned 'nil', replacing with fallback user message.")
             response_text = user["message"]
+
     except Exception as e:
-        logger.info(f"Error processing Gemini response: {str(e)}")
+        logger.error(f"Error from LLM: {str(e)}")
         response_text = user["message"]
 
     logs_collection.insert_one({
-        "type" : "response",
-        "username" : username,
-        "apikey" : api_key,
-        "text" : response_text,
-        "timestamp" : datetime.utcnow().isoformat()
+        "type": "response",
+        "username": username,
+        "apikey": api_key,
+        "text": response_text,
+        "model" :model_id,
+        "timestamp": datetime.utcnow().isoformat()
     })
-    
+
     return {"response": response_text}
 
 
