@@ -88,6 +88,7 @@ async def process_text(request: Request, query_request: QueryRequest):
             "username" : username,
             "apikey" : api_key,
             "text" : query,
+            "model" : selected_model,
             "timestamp" : datetime.utcnow().isoformat()
         })
 
@@ -120,7 +121,23 @@ async def process_text(request: Request, query_request: QueryRequest):
             spit out points bluntly, explain little .If you can't find an answer within the data,
             do not try to generate an answer beyond it. Do NOT use special formatting or hidden tokens like ◁think▷. 
             Data Provided: {data}, User Query: {query}"""
-    
+    prompt = f"""
+             You are an AI assistant that can ONLY answer using the information provided below.
+
+             Strict Rules:
+             1. If the answer to the user's question is NOT explicitly available in the provided data, respond with exactly: nil
+             2. Do NOT attempt to guess, elaborate, or make up any information.
+             3. Do NOT apologize or explain why you can't answer.
+             4. Do NOT rephrase or summarize the query.
+             5. Do NOT use any formatting or special tokens.
+             Be concise, friendly, and factual — but NEVER respond outside the bounds of the given data.
+             --- Data Start ---
+             {data}
+             --- Data End ---
+             --- User Query ---
+             {query}
+             """
+                
     try:
         if selected_model == "mistral":
             model_id = "mistralai/mistral-small-3.2-24b-instruct:free"
@@ -163,7 +180,7 @@ async def process_text(request: Request, query_request: QueryRequest):
         "username": username,
         "apikey": api_key,
         "text": response_text,
-        "model" :model_id,
+        "model" :selected_model,
         "timestamp": datetime.utcnow().isoformat()
     })
 
