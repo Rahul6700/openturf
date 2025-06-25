@@ -4,8 +4,6 @@ import './index.css'
 
 function Widget() {
 
-  const apikey = '1379e4b84850a7b0478053ab1ed904e03026a14308411f02fd9d7fb1d433576b'
-
   const [messages, setmessages] = useState([]);
   const [input, setinput] = useState("");
   const [model, setmodel] = useState("gemini");
@@ -127,7 +125,6 @@ const handleVoice = () => {
         <option value="gemini">Gemini</option>
         <option value="deepseek">DeepSeek</option>
         <option value="Mistral">Mistral</option>
-        <option value="kimi-dev">Kimi-dev</option>
       </select>
     </div>
   );
