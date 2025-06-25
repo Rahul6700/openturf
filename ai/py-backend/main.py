@@ -122,9 +122,7 @@ async def process_text(request: Request, query_request: QueryRequest):
             Data Provided: {data}, User Query: {query}"""
     
     try:
-        if selected_model == "kimi-dev":
-            model_id = "moonshotai/kimi-dev-72b:free"
-        elif selected_model == "mistral":
+        if selected_model == "mistral":
             model_id = "mistralai/mistral-small-3.2-24b-instruct:free"
         elif selected_model == "deepseek":
             model_id = "deepseek/deepseek-r1-0528-qwen3-8b:free"
