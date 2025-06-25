@@ -85,4 +85,38 @@ select option:hover {
   margin-top: 10px;
 }
 
+.messages {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.message {
+  padding: 10px 14px;
+  border-radius: 16px;
+  max-width: 60%;  /* Prevent overly wide bubbles */
+  word-wrap: break-word;
+  display: inline-block;
+}
+
+/* User message aligned to right */
+.user-message {
+  background-color: #dcf8c6; /* Light green */
+  align-self: flex-end;
+  border-top-right-radius: 0;
+}
+
+/* AI message aligned to left */
+.ai-message {
+  background-color: #f1f0f0; /* Light gray */
+  align-self: flex-start;
+  border-top-left-radius: 0;
+}
+
+
 

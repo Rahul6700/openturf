@@ -4,6 +4,9 @@ import './index.css'
 
 function Widget() {
 
+  //temp api key to test
+  const apikey = "1379e4b84850a7b0478053ab1ed904e03026a14308411f02fd9d7fb1d433576b"
+
   const [messages, setmessages] = useState([]);
   const [input, setinput] = useState("");
   const [model, setmodel] = useState("gemini");
@@ -117,7 +120,7 @@ const handleVoice = () => {
     <div className="widget-container">
       <div className="messages">
         {messages.map((msg, i) => (
-          <div key={i} className="message">
+          <div key={i} className={`message ${msg.sender === 'user' ? 'user-message' : 'ai-message'}`}>
             <strong>{msg.sender}:</strong> {msg.text}
           </div>
         ))}
