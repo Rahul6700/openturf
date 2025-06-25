@@ -7,6 +7,7 @@ function Widget() {
   const [messages, setmessages] = useState([]);
   const [input, setinput] = useState("");
   const [model, setmodel] = useState("gemini");
+  const [loading, setloading] = useState(false);
 
   const handleText = async () => {
 
@@ -23,6 +24,8 @@ function Widget() {
     setmessages([...messages, newMessage]);
 
     setinput("");
+
+    setloading(true);
 
     //get the API key from localstorage or something
     
@@ -51,6 +54,8 @@ function Widget() {
 
     } catch (error) {
       console.error("Error sending message:", error);
+    } finally {
+      setloading(false);
     }
   };
 
@@ -116,10 +121,11 @@ const handleVoice = () => {
             <strong>{msg.sender}:</strong> {msg.text}
           </div>
         ))}
+      {loading && <div className="loading">AI is thinking...</div>}
       </div>
       <input type="text" value={input} placeholder="enter message here..." onChange={(e) => setinput(e.target.value)} />
       <button onClick={handleText}>Send</button>
-      <button onClick={handleVoice}>Voice</button>
+      <button onClick={handleVoice} disabled={loading}>Voice</button>
       <label> Model : </label>
       <select className="select-button" value={model} onChange={(e)=>{setmodel(e.target.value)}}>
         <option value="gemini">Gemini</option>

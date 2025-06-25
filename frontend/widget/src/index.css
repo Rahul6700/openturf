@@ -79,4 +79,10 @@ select option:hover {
   color: white;
 }
 
+.loading {
+  font-style: italic;
+  color: gray;
+  margin-top: 10px;
+}
+
 
