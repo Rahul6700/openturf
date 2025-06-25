@@ -4,8 +4,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 function Home() {
 
-  const apikey = 'a8dabd14dc811cd82239347883cf692855743660231cbc074978421418feb7f4'
-
   const [message, setmessage] = useState("your custom message here");
   const [logs, setLogs] = useState([]);
   const [file, setFile] = useState(null);

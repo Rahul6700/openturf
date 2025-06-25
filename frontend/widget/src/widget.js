@@ -4,10 +4,11 @@ import './index.css'
 
 function Widget() {
 
-  const apikey = 'a8dabd14dc811cd82239347883cf692855743660231cbc074978421418feb7f4'
+  const apikey = '1379e4b84850a7b0478053ab1ed904e03026a14308411f02fd9d7fb1d433576b'
 
   const [messages, setmessages] = useState([]);
   const [input, setinput] = useState("");
+  const [model, setmodel] = useState("gemini");
 
   const handleText = async () => {
 
@@ -37,7 +38,8 @@ function Widget() {
           "Authorization": apikey
         },
         body: JSON.stringify({
-        query: input 
+        query: input,
+        model : model
       })
     });
     console.log('recieved response from backend')
@@ -120,6 +122,13 @@ const handleVoice = () => {
       <input type="text" value={input} placeholder="enter message here..." onChange={(e) => setinput(e.target.value)} />
       <button onClick={handleText}>Send</button>
       <button onClick={handleVoice}>Voice</button>
+      <label> Model : </label>
+      <select className="select-button" value={model} onChange={(e)=>{setmodel(e.target.value)}}>
+        <option value="gemini">Gemini</option>
+        <option value="deepseek">DeepSeek</option>
+        <option value="Mistral">Mistral</option>
+        <option value="kimi-dev">Kimi-dev</option>
+      </select>
     </div>
   );
 }
