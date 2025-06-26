@@ -14,7 +14,10 @@ from sentence_transformers import SentenceTransformer
 import logging
 import re
 import redis
+from redis.commands.search.query import Query
 from openai import OpenAI as OpenRouterClient
+import json
+from redis_utils import create_index, store_cache, search_cache 
 
 logging.basicConfig(
     level=logging.INFO,  # You can use DEBUG for more verbosity
@@ -36,6 +39,21 @@ app.add_middleware(
 
 load_dotenv('../../.env')
 
+r = redis.Redis(
+    host=os.getenv("REDIS_HOST"),
+    port=os.getenv("REDIS_PORT"),
+    username="default",
+    password=os.getenv("REDIS_PASSWORD"),
+    ssl = False 
+)
+try:
+    response = r.ping()
+    if response:
+        print("Redis is connected")
+except redis.exceptions.ConnectionError as e:
+    print(f"Redis connection failed: {e}")
+
+create_index(r)
 
 pc = Pinecone(
     api_key=os.getenv("PINECONE_API_KEY"),
@@ -67,18 +85,25 @@ async def process_text(request: Request, query_request: QueryRequest):
         raise HTTPException(status_code=404, detail="User not found")
 
     username = user["username"]
-    pinecone_index_name = username  
-    selected_model = query_request.model
+    pinecone_index_name = username
+    selected_model = query_request.model.strip().lower()
+
+    logger.info(f"user user has promted to use {selected_model}")
+    logger.info("Loading SentenceTransformer model.")
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+
+    query = query_request.query
+    logger.info(f"Query received: {query}")
+
+    cached = search_cache(r, model, username, query)
+    if cached:
+        logger.info('redis cache hit')
+        return cached
+    logger.info('cache not hit')
 
     try:
         logger.info("Initializing Pinecone index.")
         index = pc.Index(pinecone_index_name)
-
-        logger.info("Loading SentenceTransformer model.")
-        model = SentenceTransformer("all-MiniLM-L6-v2")
-
-        query = query_request.query
-        logger.info(f"Query received: {query}")
 
         query_vector = model.encode(query).tolist()
         logger.info(f"Query vector length: {len(query_vector)}")
@@ -146,8 +171,9 @@ async def process_text(request: Request, query_request: QueryRequest):
         else:
             model_id = None
 
+        logger.info(f"selected model is {model_id}")
+
         if model_id:
-            logger.info('using',model_id)
             openrouter_client = OpenRouterClient(
                 base_url="https://openrouter.ai/api/v1",
                 api_key=os.getenv("OPENAI_API_KEY")
@@ -183,6 +209,8 @@ async def process_text(request: Request, query_request: QueryRequest):
         "model" :selected_model,
         "timestamp": datetime.utcnow().isoformat()
     })
+
+    store_cache(r, model, username, query, response_text)
 
     return {"response": response_text}
 
