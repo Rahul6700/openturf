@@ -17,7 +17,7 @@ import redis
 from redis.commands.search.query import Query
 from openai import OpenAI as OpenRouterClient
 import json
-from redis_utils import create_index, store_cache, search_cache 
+from redis_utils import create_index, store_cache, search_cache
 
 logging.basicConfig(
     level=logging.INFO,  # You can use DEBUG for more verbosity
@@ -157,7 +157,7 @@ async def process_text(request: Request, query_request: QueryRequest):
              5. Do NOT use any formatting or special tokens.
              Be concise, friendly, and factual — but NEVER respond outside the bounds of the given data.
              --- Data Start ---
-             {data}
+             {data}            logger.info('using',model_id)
              --- Data End ---
              --- User Query ---
              {query}
@@ -243,7 +243,7 @@ async def upload_pdf(request: Request, file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="The PDF appears to be empty or unreadable.")
 
     try:
-    # Split the text into chunks -> chunk size = 500 with overlap of 50
+    #Split the text into chunks -> chunk size = 500 with overlap of 50
         chunk_size = 500
         overlap = 50
         chunks = []
@@ -260,8 +260,8 @@ async def upload_pdf(request: Request, file: UploadFile = File(...)):
         logger.info('finished loading model')
 
         vectors = []
-
-        #sanitizing the file so that the model does not crash
+        
+        #sanitize file name cuz a file name like with special char's crashes the server
         safe_filename = re.sub(r'[^a-zA-Z0-9_.-]', '_', file.filename)
 
         for i, chunk in enumerate(chunks):
@@ -276,7 +276,7 @@ async def upload_pdf(request: Request, file: UploadFile = File(...)):
         logger.info('put chuks in the array')
 
         index = pc.Index(pinecone_index_name)
-        index.upsert(vectors=vectors)# make sure `index` is defined from pinecone.Index(...)
+        index.upsert(vectors=vectors)
         logger.info('added to db')
         return "Successfully uploaded and stored embeddings."
 
