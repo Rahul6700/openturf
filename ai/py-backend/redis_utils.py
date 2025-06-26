@@ -46,6 +46,10 @@ def store_cache(r, model, username, query, response_text, index_name="query_cach
             response=response_text,
             username=username
         )
+        
+        #setting ttl for the cache, 21,600 seconds (6 hours) now
+        r.expire(doc_id, 21600)
+
         logger.info(f"Cached response for user '{username}' and query '{query}'")
     except Exception as e:
         logger.error(f"Failed to store cache: {str(e)}")
