@@ -133,7 +133,7 @@ const handleVoice = () => {
       <select className="select-button" value={model} onChange={(e)=>{setmodel(e.target.value)}}>
         <option value="gemini">Gemini</option>
         <option value="deepseek">DeepSeek</option>
-        <option value="Mistral">Mistral</option>
+        <option value="mistral">Mistral</option>
       </select>
     </div>
   );

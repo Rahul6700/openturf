@@ -230,14 +230,26 @@ async def upload_pdf(request: Request, file: UploadFile = File(...)):
     username = user["username"]  #username found and stored here
     pinecone_index_name = username
 
-    temp_path = f"/tmp/{file.filename}"
-    with open(temp_path, "wb") as f:
-        f.write(await file.read())
+    file_bytes = await file.read()
+    filename = file.filename.lower()
 
-    doc = fitz.open(temp_path)
-    text = "\n".join(page.get_text() for page in doc)
-    doc.close()
-    os.remove(temp_path)
+    try:
+        if filename.endswith('.pdf'):
+            with fitz.open(stream=file_bytes, filetype="pdf") as doc:
+                text = "\n".join(page.get_text() for page in doc)
+        elif filename.endswith(".docx"):
+            doc = docx.Document(io.BytesIO(file_bytes))
+            text = "\n".join([para.text for para in doc.paragraphs])
+        elif filename.endswith(".txt"):
+            try:
+                text = file_bytes.decode("utf-8")
+            except UnicodeDecodeError:
+                text = file_bytes.decode("latin-1")
+        else:
+            raise HTTPException(status_code=400, detail="only .pdf .docx and .txt files are allowed")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to read file: {str(e)}")
+
 
     if not text.strip():
         raise HTTPException(status_code=400, detail="The PDF appears to be empty or unreadable.")
