@@ -10,6 +10,7 @@ function Home() {
   const [message, setmessage] = useState("your custom message here");
   const [logs, setLogs] = useState([]);
   const [file, setFile] = useState(null);
+  const [docs, setdocs] = useState([]);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -92,9 +93,25 @@ function Home() {
     }
   };
 
+  const fetchKnowledgeBase = async () =>{
+    try {
+      const res = await fetch('http://localhost:5000/viewKnowledgeBase', {
+        method: 'GET',
+        headers: {
+          'Authorization' : apikey
+        }
+      });
+
+      const docs = await res.json();
+      setdocs(docs.success || [])
+    } catch (e) {
+      console.log('error getting KD docs arr:',e);
+      alert('error loading knowledge base, please try later')
+    }
+  }
+
   return (
     <div className="container py-5">
-      <h2 className="mb-4">Admin Dashboard</h2>
 
       <div className="card mb-4">
         <div className="card-header">Upload to Knowledge Base</div>
@@ -106,9 +123,23 @@ function Home() {
             onChange={handleFileChange}
           />
           <button className="btn btn-info me-3" onClick={handleUpload}>Upload</button>
-          <button className = "btn btn-primary">View Knowledge Base ▼</button>
+          <button className="btn btn-primary" onClick={fetchKnowledgeBase}>
+            View Knowledge Base ▼
+          </button>
+
+          <div style={{ maxHeight: '300px', overflowY: 'auto' }} className="mt-3">
+            <ul className="list-group">
+              {docs.map((doc, index) => (
+                <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                  <div>{doc}</div>
+                  <button className="btn btn-sm btn-danger">Delete</button>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
+
 
       <div className="card mb-4">
         <div className="card-header">Set Custom Rejection Message</div>
