@@ -25,7 +25,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 app = FastAPI()
 
 #cors middleware cuz backend and frontend are running on localhost for now
@@ -232,6 +231,12 @@ async def upload_pdf(request: Request, file: UploadFile = File(...)):
 
     file_bytes = await file.read()
     filename = file.filename.lower()
+
+    #adding the file name to the docs array
+    users_collection.update_one(
+        {"apikey" : apikey},
+        {"$push" : {"docs" : filename}}
+    )
 
     try:
         if filename.endswith('.pdf'):
