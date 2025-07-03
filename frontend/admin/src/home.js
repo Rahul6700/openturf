@@ -4,6 +4,9 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 function Home() {
 
+  //dummy apikey to test
+  const apikey = "1b35b71c32305e95e64ede7e2d0ae527a42ca5283ab794fa9983a25d2954fa5c"
+
   const [message, setmessage] = useState("your custom message here");
   const [logs, setLogs] = useState([]);
   const [file, setFile] = useState(null);
@@ -102,7 +105,8 @@ function Home() {
             accept="application/pdf"
             onChange={handleFileChange}
           />
-          <button className="btn btn-info" onClick={handleUpload}>Upload</button>
+          <button className="btn btn-info me-3" onClick={handleUpload}>Upload</button>
+          <button className = "btn btn-primary">View Knowledge Base ▼</button>
         </div>
       </div>
 
