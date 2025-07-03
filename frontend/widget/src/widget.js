@@ -129,6 +129,7 @@ recognition.onaudioend = () => {
           alert('Microphone access denied. Please allow microphone access and reload the page.');
           break;
         case 'network':
+          alert("either your browser dosnt suppoert webSpeechAPI or there is an Network Issue")
           console.log('Network error - this might be normal if no speech detected');
           break;
         case 'aborted':
