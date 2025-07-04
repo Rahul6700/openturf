@@ -110,6 +110,32 @@ function Home() {
     }
   }
 
+  const handleDeleteDoc = async (doc) => {
+    try {
+      const response = await fetch("http://localhost:8000/deleteDoc", {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization' : apikey
+        },
+        body: JSON.stringify({ doc : doc })
+      });
+
+    if (!response.ok) {
+      alert("Failed to delete document");
+    }
+
+    const result = await response.json();
+    console.log("Delete success:", result);
+
+    setdocs((prevdocs) => prevdocs.filter((d) => d !== doc));
+  } catch (error) {
+    console.log(error)
+  }
+  }
+
+
+
   return (
     <div className="container py-5">
 
@@ -131,7 +157,7 @@ function Home() {
               {docs.map((doc, index) => (
                 <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
                   <div>{doc}</div>
-                  <button className="btn btn-sm btn-danger">Delete</button>
+                  <button className="btn btn-sm btn-danger" onClick={()=>{handleDeleteDoc(doc)}}>Delete</button>
                 </li>
               ))}
             </ul>
