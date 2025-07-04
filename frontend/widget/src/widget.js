@@ -3,7 +3,7 @@ import './index.css'
 
 function Widget() {
   //temp api key to test
-  const apikey = "1379e4b84850a7b0478053ab1ed904e03026a14308411f02fd9d7fb1d433576b"
+  const apikey = "1e7386d20e94be17a0115fcd0e27495ac16c5ea202a82f124e98a30cb84dddf8"
 
   const [messages, setmessages] = useState([]);
   const [input, setinput] = useState("");
@@ -222,7 +222,7 @@ recognition.onaudioend = () => {
       />
       <button onClick={handleText}>Send</button>
       <button onClick={handleVoice} disabled={loading || isListening}>
-        {isListening ? 'Listening...' : '🎙️'}
+        {isListening ? 'listening' : '🎙️'}
       </button>
       <label> Model : </label>
       <select className="select-button" value={model} onChange={(e)=>{setmodel(e.target.value)}}>

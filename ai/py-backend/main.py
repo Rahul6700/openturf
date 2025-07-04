@@ -234,7 +234,7 @@ async def upload_pdf(request: Request, file: UploadFile = File(...)):
 
     #adding the file name to the docs array
     users_collection.update_one(
-        {"apikey" : apikey},
+        {"apikey" : api_key},
         {"$push" : {"docs" : filename}}
     )
 
@@ -301,4 +301,28 @@ async def upload_pdf(request: Request, file: UploadFile = File(...)):
         logger.error(f"Exception in upload_pdf: {e}", exc_info=True)
         logger.info(str(e))
         raise HTTPException(status_code=500, detail="Internal server error. Try again later.")
+
+
+@app.get("/fetchKnowledgeBase")
+async def view_knowledge_base(request: Request):
+    api_key = request.headers.get("Authorization")
+    try:
+        if not api_key:
+            raise HTTPException(status_code=400, detail="API key is missing in the request header")
+
+        user = users_collection.find_one({"apikey": api_key})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        doc = user["docs"]
+
+        return {"success": doc}
+
+    except Exception as e:
+        logger.exception("Unexpected error occurred in view_knowledge_base")
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error"}
+        )
+
 

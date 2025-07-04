@@ -5,7 +5,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 function Home() {
 
   //dummy apikey to test
-  const apikey = "1b35b71c32305e95e64ede7e2d0ae527a42ca5283ab794fa9983a25d2954fa5c"
+  const apikey = "1e7386d20e94be17a0115fcd0e27495ac16c5ea202a82f124e98a30cb84dddf8"
 
   const [message, setmessage] = useState("your custom message here");
   const [logs, setLogs] = useState([]);
@@ -95,7 +95,7 @@ function Home() {
 
   const fetchKnowledgeBase = async () =>{
     try {
-      const res = await fetch('http://localhost:5000/viewKnowledgeBase', {
+      const res = await fetch('http://localhost:8000/fetchKnowledgeBase', {
         method: 'GET',
         headers: {
           'Authorization' : apikey
@@ -126,7 +126,6 @@ function Home() {
           <button className="btn btn-primary" onClick={fetchKnowledgeBase}>
             View Knowledge Base ▼
           </button>
-
           <div style={{ maxHeight: '300px', overflowY: 'auto' }} className="mt-3">
             <ul className="list-group">
               {docs.map((doc, index) => (
