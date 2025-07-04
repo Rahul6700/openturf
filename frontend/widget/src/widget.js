@@ -7,7 +7,6 @@ function Widget() {
 
   const [messages, setmessages] = useState([]);
   const [input, setinput] = useState("");
-  const [model, setmodel] = useState("gemini");
   const [loading, setloading] = useState(false);
   const [isListening, setisListening] = useState(false)
   const [transcript, settranscript] = useState("")
@@ -184,7 +183,6 @@ recognition.onaudioend = () => {
         },
         body: JSON.stringify({
           query: text,  
-          model: model
         })
       });
       
@@ -224,12 +222,6 @@ recognition.onaudioend = () => {
       <button onClick={handleVoice} disabled={loading || isListening}>
         {isListening ? 'listening' : '🎙️'}
       </button>
-      <label> Model : </label>
-      <select className="select-button" value={model} onChange={(e)=>{setmodel(e.target.value)}}>
-        <option value="gemini">Gemini</option>
-        <option value="deepseek">DeepSeek</option>
-        <option value="mistral">Mistral</option>
-      </select>
     </div>
   );
 }
