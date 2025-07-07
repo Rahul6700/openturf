@@ -1,5 +1,5 @@
 import React from "react";
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Home() {
@@ -11,7 +11,29 @@ function Home() {
   const [logs, setLogs] = useState([]);
   const [file, setFile] = useState(null);
   const [docs, setdocs] = useState([]);
-  const [model, setmodel] = useState("gemini");
+  const [model, setmodel] = useState("");
+
+  // to fetch current model used by the admin
+  useEffect(() => {
+    const fetchCurrentModel = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/getCurrentModel", {
+          headers: {
+            'Authorization': apikey
+          }
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch current model");
+        }
+        const data = await response.json();
+        setmodel(data.model || "gemini"); 
+      } catch (error) {
+        console.error(error);
+        setmodel("gemini"); //fallback to gemini incase of error
+      }
+    };
+    fetchCurrentModel();
+  }, []);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -135,6 +157,27 @@ function Home() {
   }
   }
 
+  const changeModel = async (model) => {
+    try {
+      const response = await fetch("http://localhost:5000/changeModel", {
+        method: 'POST',
+        headers: {
+          "Content-Type" : "application/json",
+          'Authorization' : apikey
+        },
+        body: JSON.stringify({ model : model})
+      })
+      if(!response.ok) {
+        alert('failed to change model')
+      }
+
+      const result = await response.json()
+      alert(result)
+    } catch (error) {
+      console.log(error)
+      alert(error)
+    }
+  }
 
 
   return (
@@ -174,7 +217,7 @@ function Home() {
             <option value="deepseek">DeepSeek</option>
             <option value="mistral">Mistral</option>
           </select>
-          <button className = "btn btn-success"> Save </button>
+          <button className = "btn btn-success" onClick={()=>{changeModel(model)}}> Save </button>
         </div>
       </div>
 
