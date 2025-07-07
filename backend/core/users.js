@@ -32,7 +32,8 @@ async function register (req,res) {
     //setting default llm failure message
     const message = "I'm unable to assist with that request. Please contact support for further help.";
     //write the user to DB
-    const newUser = new User({username, email, password: hashedPassword, apikey,docs:[], message});
+    const model = "gemini" //using gemini as default model
+    const newUser = new User({username, email, password: hashedPassword, apikey,docs:[], message, model});
     await newUser.save();
 
     //creating a new pinecone index for the user with the index name as the username

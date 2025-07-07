@@ -11,6 +11,7 @@ function Home() {
   const [logs, setLogs] = useState([]);
   const [file, setFile] = useState(null);
   const [docs, setdocs] = useState([]);
+  const [model, setmodel] = useState("gemini");
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -165,6 +166,17 @@ function Home() {
         </div>
       </div>
 
+      <div className = "card mb-4">
+        <div className = "card-header">Select Model</div>
+        <div className = "card-body">
+          <select className="select-button mb-4" value={model} onChange={(e)=>{setmodel(e.target.value)}}>
+            <option value="gemini">Gemini</option>
+            <option value="deepseek">DeepSeek</option>
+            <option value="mistral">Mistral</option>
+          </select>
+          <button className = "btn btn-success"> Save </button>
+        </div>
+      </div>
 
       <div className="card mb-4">
         <div className="card-header">Set Custom Rejection Message</div>

@@ -66,7 +66,6 @@ logs_collection = db.get_collection("logs")
 
 class QueryRequest(BaseModel):
     query : str
-    model : str
 
 @app.get("/")
 def root():
@@ -84,8 +83,8 @@ async def process_text(request: Request, query_request: QueryRequest):
         raise HTTPException(status_code=404, detail="User not found")
 
     username = user["username"]
+    selected_model = user["model"]
     pinecone_index_name = username
-    selected_model = query_request.model.strip().lower()
 
     logger.info(f"user user has promted to use {selected_model}")
     logger.info("Loading SentenceTransformer model.")
@@ -325,4 +324,51 @@ async def view_knowledge_base(request: Request):
             content={"detail": "Internal server error"}
         )
 
+class DeleteDocRequest(BaseModel):
+    doc: str
 
+@app.post("/deleteDoc")
+async def delete_doc(request: Request, payload: DeleteDocRequest):
+    api_key = request.headers.get("Authorization")
+    if not api_key:
+        raise HTTPException(status_code=400, detail="Missing API key")
+
+    user = users_collection.find_one({"apikey": api_key})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    username = user["username"]
+    pinecone_index_name = username
+
+    try:
+        index = pc.Index(pinecone_index_name)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load Pinecone index: {str(e)}")
+
+    # SANITIZE THE File name to match upload time name
+    safe_filename = re.sub(r'[^a-zA-Z0-9_.-]', '_', payload.doc.lower())
+
+    try:
+
+        all_vector_ids = []
+        response = index.describe_index_stats()
+        total_vectors = response.get('total_vector_count', 0)
+
+        if total_vectors == 0:
+            raise HTTPException(status_code=404, detail="No vectors found in index.")
+
+        max_chunks = 500
+        matching_ids = [f"{safe_filename}-chunk-{i}" for i in range(max_chunks)]
+
+        index.delete(ids=matching_ids)
+
+        users_collection.update_one(
+            {"apikey": api_key},
+            {"$pull": {"docs": payload.doc}}
+        )
+
+        return {"success": True, "deleted_doc": payload.doc}
+
+    except Exception as e:
+        logger.error(f"Error deleting vectors for doc '{payload.doc}': {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to delete vectors from Pinecone.")
