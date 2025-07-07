@@ -4,7 +4,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors')
 const mongoose = require('mongoose');
-const {register, signin, modifyMessage, viewLogs, getCurrentModel} = require('./core/users');
+const {register, signin, modifyMessage, viewLogs, getCurrentModel, changeModel} = require('./core/users');
 
 app.use(express.json());
 app.use(cors()); //using cors cuz both BE and FE are running on localhost
@@ -26,6 +26,7 @@ app.post('/signin', signin);
 app.post('/modify', modifyMessage);
 app.get('/logs', viewLogs);
 app.get('getCurrentModel', getCurrentModel);
+app.post('/changeModel', changeModel);
 
 let PORT = 5000;
 app.listen(PORT, ()=>{
