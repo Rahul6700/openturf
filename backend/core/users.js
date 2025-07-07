@@ -140,4 +140,24 @@ async function viewLogs (req, res) {
   }
 }
 
-module.exports = { register, signin, modifyMessage, viewLogs };
+const getCurrentModel = async (req, res) => {
+  try {
+    const apikey = req.headers['authorization'];
+    if(!apikey){
+      return res.status(401).json({ error : `missing apikey`})
+    }
+
+    const user = await User.findOne({ apikey })
+
+    if(!user) {
+      return res.status(401).json( {error : 'user not found'})
+    }
+
+    res.status(201).json({ success: user.model})
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ error : 'interal server error'})
+  }
+}
+
+module.exports = { register, signin, modifyMessage, viewLogs, getCurrentModel };
