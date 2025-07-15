@@ -3,7 +3,7 @@ import './index.css'
 
 function Widget() {
   //temp api key to test
-  const apikey = "1e7386d20e94be17a0115fcd0e27495ac16c5ea202a82f124e98a30cb84dddf8"
+  const apikey = "b7948ef1b91b0cd78ecd6b46694a01c5182502b9d6364d9238d421da899ce84e"
 
   const [messages, setmessages] = useState([]);
   const [input, setinput] = useState("");

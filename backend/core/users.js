@@ -162,7 +162,7 @@ const getCurrentModel = async (req, res) => {
 
 const changeModel = async (req, res) => {
   try {
-    const model = req.body;
+    const {model} = req.body;
     const apikey = req.headers['authorization']
     if(!apikey) {
       return res.status(401).json({ error : `missing apikey`})
@@ -178,8 +178,8 @@ const changeModel = async (req, res) => {
 
     return res.status(200).json({ success : `response model changed to ${model}`})
   } catch (e) {
-      return res.status(500).json({ error : 'internal server error'})
       console.log(e)
+      return res.status(500).json({ error : 'internal server error'})
   }
 }
 

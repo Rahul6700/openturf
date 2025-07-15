@@ -5,7 +5,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 function Home() {
 
   //dummy apikey to test
-  const apikey = "1e7386d20e94be17a0115fcd0e27495ac16c5ea202a82f124e98a30cb84dddf8"
+  const apikey = "b7948ef1b91b0cd78ecd6b46694a01c5182502b9d6364d9238d421da899ce84e"
 
   const [message, setmessage] = useState("your custom message here");
   const [logs, setLogs] = useState([]);
@@ -168,11 +168,12 @@ function Home() {
         body: JSON.stringify({ model : model})
       })
       if(!response.ok) {
+        console.log(response)
         alert('failed to change model')
       }
 
       const result = await response.json()
-      alert(result)
+      alert(result.success)
     } catch (error) {
       console.log(error)
       alert(error)

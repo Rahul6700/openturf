@@ -25,7 +25,7 @@ app.post('/register', register);
 app.post('/signin', signin);
 app.post('/modify', modifyMessage);
 app.get('/logs', viewLogs);
-app.get('getCurrentModel', getCurrentModel);
+app.get('/getCurrentModel', getCurrentModel);
 app.post('/changeModel', changeModel);
 
 let PORT = 5000;
