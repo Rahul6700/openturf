@@ -248,6 +248,7 @@ function Home() {
             <li key={index} className="list-group-item">
               <div><strong>Type:</strong> {log.type}</div>
               <div><strong>Text:</strong> {log.text}</div>
+              <div><strong>Model:</strong> {log.model}</div>
               <div><strong>Timestamp:</strong> {new Date(log.timestamp).toLocaleString()}</div>
             </li>
           ))}
