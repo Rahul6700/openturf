@@ -212,12 +212,12 @@ function Home() {
       <div className = "card mb-4">
         <div className = "card-header">Select Model</div>
         <div className = "card-body">
-          <select className="select-button mb-4" value={model} onChange={(e)=>{setmodel(e.target.value)}}>
+          <select className="select-button mb-3" value={model} onChange={(e)=>{setmodel(e.target.value)}}>
             <option value="gemini">Gemini</option>
             <option value="deepseek">DeepSeek</option>
             <option value="mistral">Mistral</option>
           </select>
-          <button className = "btn btn-success" onClick={()=>{changeModel(model)}}> Save </button>
+          <button className = "btn btn-success ms-3" onClick={()=>{changeModel(model)}}> Save </button>
         </div>
       </div>
 
