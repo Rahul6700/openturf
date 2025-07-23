@@ -64,6 +64,9 @@ db = mongo_client.get_database("widget")
 users_collection = db.get_collection("users")
 logs_collection = db.get_collection("logs")
 
+model = SentenceTransformer("all-MiniLM-L6-v2")
+logger.info('loading the MiniLM-L6-v2 vectorizer model globally')
+
 class QueryRequest(BaseModel):
     query : str
 
@@ -87,8 +90,6 @@ async def process_text(request: Request, query_request: QueryRequest):
     pinecone_index_name = username
 
     logger.info(f"user user has promted to use {selected_model}")
-    logger.info("Loading SentenceTransformer model.")
-    model = SentenceTransformer("all-MiniLM-L6-v2")
 
     query = query_request.query
     logger.info(f"Query received: {query}")
@@ -271,9 +272,6 @@ async def upload_pdf(request: Request, file: UploadFile = File(...)):
                 chunks.append(chunk)
             start += chunk_size - overlap
         logger.info("split into chunks")
-
-        model = SentenceTransformer("all-MiniLM-L6-v2")
-        logger.info('finished loading model')
 
         vectors = []
         
