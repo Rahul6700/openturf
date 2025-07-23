@@ -18,6 +18,10 @@ from redis.commands.search.query import Query
 from openai import OpenAI as OpenRouterClient
 import json
 from redis_utils import create_index, store_cache, search_cache
+from pydantic import BaseModel, HttpUrl
+from bs4 import BeautifulSoup
+import requests
+import re
 
 logging.basicConfig(
     level=logging.INFO,  # You can use DEBUG for more verbosity
@@ -370,3 +374,87 @@ async def delete_doc(request: Request, payload: DeleteDocRequest):
     except Exception as e:
         logger.error(f"Error deleting vectors for doc '{payload.doc}': {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to delete vectors from Pinecone.")
+
+class URLrequest(BaseModel):
+    url:HttpUrl #auto validation checking whether its a valid URL
+
+@app.post("/upload-url")
+async def upload_url(request: Request, payload: URLrequest):
+
+    api_key = request.headers.get("Authorization")
+    if not api_key:
+        raise HTTPException(status_code=400, detail="Missing API key")
+
+    user = users_collection.find_one({"apikey": api_key})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    username = user["username"]
+    pinecone_index_name = username
+    url = str(payload.url)
+
+    logger.info(f"fetching content from {url}")
+
+    try:
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Remove unwanted tags
+        for tag in soup(['script', 'style', 'noscript']):
+            tag.decompose()
+
+        text = soup.get_text(separator=' ', strip=True)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to fetch content from URL, make sure you enter a valid URL")
+
+    if not text or len(text) < 100:
+        raise HTTPException(status_code=400, detail="Insufficient textual content on the page.")
+
+    logger.info(f"Extracted {len(text)} characters of text from the page.")
+
+        # Step 2: Chunk text
+    chunk_size = 500
+    overlap = 50
+    chunks = []
+    start = 0
+    while start < len(text):
+        end = min(start + chunk_size, len(text))
+        chunk = text[start:end].strip()
+        if chunk:
+            chunks.append(chunk)
+        start += chunk_size - overlap
+
+    logger.info(f"Split text into {len(chunks)} chunks.")
+
+    # Step 3: Vectorize chunks
+    vectors = []
+    safe_id_base = re.sub(r'[^a-zA-Z0-9_.-]', '_', url)
+
+    for i, chunk in enumerate(chunks):
+        embedding = model.encode(chunk).tolist()
+        vectors.append({
+            "id": f"{safe_id_base}-chunk-{i}",
+            "values": embedding,
+            "metadata": {
+                "text": chunk
+            }
+        })
+
+    # Step 4: Store in Pinecone
+    try:
+        index = pc.Index(pinecone_index_name)
+        index.upsert(vectors=vectors)
+        logger.info(f"Stored {len(vectors)} vectors in Pinecone.")
+    except Exception as e:
+        logger.error(f"Pinecone error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to upsert vectors to Pinecone.")
+
+    # Step 5: Save metadata (like file upload does)
+    users_collection.update_one(
+        {"apikey": api_key},
+        {"$push": {"docs": url}}
+    )
+
+    return {"success": True, "message": f"Successfully processed and stored vectors from {url}"}
+
