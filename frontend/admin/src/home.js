@@ -5,13 +5,15 @@ import "bootstrap/dist/css/bootstrap.min.css";
 function Home() {
 
   //dummy apikey to test
-  const apikey = "b7948ef1b91b0cd78ecd6b46694a01c5182502b9d6364d9238d421da899ce84e"
+  const apikey = "366425f402416109827cb5b9f248e5ac23ac318636f6cf7ecc527f3cf30e3c38"
 
   const [message, setmessage] = useState("your custom message here");
   const [logs, setLogs] = useState([]);
   const [file, setFile] = useState(null);
   const [docs, setdocs] = useState([]);
   const [model, setmodel] = useState("");
+  const [url, setUrl] = useState("");
+  const [userName,setuserName] = useState("Admin");
 
   // to fetch current model used by the admin
   useEffect(() => {
@@ -26,6 +28,7 @@ function Home() {
           throw new Error("Failed to fetch current model");
         }
         const data = await response.json();
+        setuserName(data.username)
         setmodel(data.model || "gemini"); 
       } catch (error) {
         console.error(error);
@@ -182,10 +185,11 @@ function Home() {
 
   return (
     <div className="container py-5">
-
+    <h1>Welcome, {userName}</h1>
       <div className="card mb-4">
         <div className="card-header">Upload to Knowledge Base</div>
         <div className="card-body">
+        <div className="mb-3">
           <input
             type="file"
             className="form-control mb-3"
@@ -193,7 +197,12 @@ function Home() {
             onChange={handleFileChange}
           />
           <button className="btn btn-info me-3" onClick={handleUpload}>Upload</button>
-          <button className="btn btn-primary" onClick={fetchKnowledgeBase}>
+        </div>
+        <div>
+          <input type="url" className="url me-3" style={{width: '600px'}} placeholder="enter your URL here" accept="text" onChange={(e)=>{setUrl(e.target.value)}}/>
+          <button className="btn btn-info ml-3" >Upload</button>
+        </div>
+          <button className="btn btn-primary mt-4" onClick={fetchKnowledgeBase}>
             View Knowledge Base ▼
           </button>
           <div style={{ maxHeight: '300px', overflowY: 'auto' }} className="mt-3">
@@ -212,6 +221,7 @@ function Home() {
       <div className = "card mb-4">
         <div className = "card-header">Select Model</div>
         <div className = "card-body">
+          <h3> Current : {model} </h3>
           <select className="select-button mb-3" value={model} onChange={(e)=>{setmodel(e.target.value)}}>
             <option value="gemini">Gemini</option>
             <option value="deepseek">DeepSeek</option>
