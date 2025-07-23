@@ -153,7 +153,10 @@ const getCurrentModel = async (req, res) => {
       return res.status(401).json( {error : 'user not found'})
     }
 
-    res.status(201).json({ success: user.model})
+    res.status(201).json({
+      model: user.model,
+      username: user.username
+    })
   } catch (error) {
     console.log(error)
     return res.status(500).json({ error : 'interal server error'})

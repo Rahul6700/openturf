@@ -183,6 +183,35 @@ function Home() {
     }
   }
 
+  const uploadUrl = async () => {
+    console.log(`url is ${url}`)
+  try {
+    console.log('upload url called')
+    const response = await fetch("http://localhost:8000/upload-url", {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": apikey,  
+      },
+      body: JSON.stringify({ url })  
+    });
+
+    if (!response.ok) {
+      console.log('Fetch error:', response);
+      alert('Failed to upload URL. Please make sure you enter a valid URL');
+      return;
+    }
+
+    const result = await response.json();
+    alert(result.message);
+  } catch (error) {
+    console.error('Upload error:', error);
+    alert('Internal server error');
+  }
+  setUrl("");
+};
+
+
   return (
     <div className="container py-5">
     <h1>Welcome, {userName}</h1>
@@ -199,8 +228,8 @@ function Home() {
           <button className="btn btn-info me-3" onClick={handleUpload}>Upload</button>
         </div>
         <div>
-          <input type="url" className="url me-3" style={{width: '600px'}} placeholder="enter your URL here" accept="text" onChange={(e)=>{setUrl(e.target.value)}}/>
-          <button className="btn btn-info ml-3" >Upload</button>
+          <input type="text" className="url me-3" value={url} style={{width: '600px'}} placeholder="enter your URL here" onChange={(e)=>{setUrl(e.target.value)}}/>
+          <button className="btn btn-info ml-3" onClick={() => {console.log("Button clicked");uploadUrl();}}>Upload</button>
         </div>
           <button className="btn btn-primary mt-4" onClick={fetchKnowledgeBase}>
             View Knowledge Base ▼
