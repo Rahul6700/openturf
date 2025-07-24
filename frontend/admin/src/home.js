@@ -5,7 +5,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 function Home() {
 
   //dummy apikey to test
-  const apikey = "366425f402416109827cb5b9f248e5ac23ac318636f6cf7ecc527f3cf30e3c38"
+  const apikey = "bac4887f06b5ecaace9ebef4dff0c39a14666c0c8b098490271791cfb793b42c"
 
   const [message, setmessage] = useState("your custom message here");
   const [logs, setLogs] = useState([]);
@@ -19,7 +19,7 @@ function Home() {
   useEffect(() => {
     const fetchCurrentModel = async () => {
       try {
-        const response = await fetch("http://localhost:5000/getCurrentModel", {
+        const response = await fetch("http://localhost:5000/api/users/getCurrentModel", {
           headers: {
             'Authorization': apikey
           }
@@ -78,7 +78,7 @@ function Home() {
 
   const handleSave = async () => {
      try {
-      const response = await fetch ('http://localhost:5000/modify', {
+      const response = await fetch ('http://localhost:5000/api/users/modify', {
         method : 'POST',
         headers : {
           'Content-Type' : 'application/json',
@@ -104,7 +104,7 @@ function Home() {
   const fetchLogs = async () => {
   
     try {
-      const res = await fetch('http://localhost:5000/logs', {
+      const res = await fetch('http://localhost:5000/api/users/logs', {
         method: 'GET',
         headers: {
           'Authorization': apikey
@@ -162,7 +162,7 @@ function Home() {
 
   const changeModel = async (model) => {
     try {
-      const response = await fetch("http://localhost:5000/changeModel", {
+      const response = await fetch("http://localhost:5000/api/users/changeModel", {
         method: 'POST',
         headers: {
           "Content-Type" : "application/json",
